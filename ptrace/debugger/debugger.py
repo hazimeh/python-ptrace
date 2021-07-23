@@ -192,23 +192,24 @@ class PtraceDebugger(object):
         """
         return self._wait_event(pid, blocking)
 
-    def waitSignals(self, *signals, **kw):
+    def waitSignals(self, *signals, blocking=True, **kw):
         """
         Wait for any signal or some specific signals (if specified) from a
         specific process (if pid keyword is set) or any process (default).
         Return a ProcessSignal object or raise an unexpected ProcessEvent.
         """
         pid = kw.get('pid', None)
-        while True:
-            event = self._wait_event(pid)
-            if event.__class__ != ProcessSignal:
-                raise event
-            signum = event.signum
-            if signum in signals or not signals:
-                return event
+        event = self._wait_event(pid, blocking)
+        if event is None:
+            return
+        if event.__class__ != ProcessSignal:
             raise event
+        signum = event.signum
+        if signum in signals or not signals:
+            return event
+        raise event
 
-    def waitSyscall(self, process=None):
+    def waitSyscall(self, process=None, blocking=True):
         """
         Wait for the next syscall event (enter or exit) for a specific process
         (if specified) or any process (default). Return a ProcessSignal object
@@ -218,9 +219,9 @@ class PtraceDebugger(object):
         if self.use_sysgood:
             signum |= 0x80
         if process:
-            return self.waitSignals(signum, pid=process.pid)
+            return self.waitSignals(signum, blocking, pid=process.pid)
         else:
-            return self.waitSignals(signum)
+            return self.waitSignals(signum, blocking)
 
     def deleteProcess(self, process=None, pid=None):
         """
