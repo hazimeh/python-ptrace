@@ -150,7 +150,7 @@ class PtraceDebugger(object):
         process = None
         while not process:
             try:
-                pid, status = self._waitpid(wanted_pid, blocking)
+                pid, status = self._waitpid(wanted_pid, blocking=blocking)
             except OSError as err:
                 if err.errno == ECHILD:
                     process = self.dict[wanted_pid]
@@ -167,14 +167,14 @@ class PtraceDebugger(object):
 
     def _wait_event(self, wanted_pid, blocking=True):
         if wanted_pid is not None:
-            return self._wait_event_pid(wanted_pid, blocking)
+            return self._wait_event_pid(wanted_pid, blocking=blocking)
 
         pause = 0.001
         while True:
             pids = tuple(self.dict)
             if len(pids) > 1:
                 for pid in pids:
-                    process = self._wait_event_pid(pid, False)
+                    process = self._wait_event_pid(pid, blocking=False)
                     if process is not None:
                         return process
                 if not blocking:
@@ -182,7 +182,7 @@ class PtraceDebugger(object):
                 pause = min(pause * 2, 0.5)
                 sleep(pause)
             else:
-                return self._wait_event_pid(pids[0], blocking)
+                return self._wait_event_pid(pids[0], blocking=blocking)
 
     def waitProcessEvent(self, pid=None, blocking=True):
         """
@@ -190,7 +190,7 @@ class PtraceDebugger(object):
         set) or any process (default). If blocking=False, return None if there
         is no new event, otherwise return an object based on ProcessEvent.
         """
-        return self._wait_event(pid, blocking)
+        return self._wait_event(pid, blocking=blocking)
 
     def waitSignals(self, *signals, blocking=True, **kw):
         """
@@ -199,7 +199,7 @@ class PtraceDebugger(object):
         Return a ProcessSignal object or raise an unexpected ProcessEvent.
         """
         pid = kw.get('pid', None)
-        event = self._wait_event(pid, blocking)
+        event = self._wait_event(pid, blocking=blocking)
         if event is None:
             return
         if event.__class__ != ProcessSignal:
@@ -219,9 +219,9 @@ class PtraceDebugger(object):
         if self.use_sysgood:
             signum |= 0x80
         if process:
-            return self.waitSignals(signum, blocking, pid=process.pid)
+            return self.waitSignals(signum, blocking=blocking, pid=process.pid)
         else:
-            return self.waitSignals(signum, blocking)
+            return self.waitSignals(signum, blocking=blocking)
 
     def deleteProcess(self, process=None, pid=None):
         """
