@@ -736,7 +736,7 @@ class PtraceProcess(object):
         return self.debugger.waitSignals(*signals, pid=self.pid)
 
     def waitSyscall(self):
-        self.debugger.waitSyscall(self)
+        return self.debugger.waitSyscall(self)
 
     def findBreakpoint(self, address):
         for bp in self.breakpoints.values():
