@@ -180,7 +180,7 @@ class PtraceProcess(object):
         if not HAS_PROC:
             self.notImplementedError()
         stat = readProcessStat(self.pid)
-        return (stat.state == 'T')
+        return (stat.state in ('t', 'T'))
 
     def attach(self):
         if self.is_attached:
