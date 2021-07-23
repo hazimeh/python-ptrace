@@ -464,6 +464,8 @@ class PtraceProcess(object):
         ptrace_singlestep(self.pid)
 
     def filterSignal(self, signum):
+        if self.debugger.use_sysgood:
+            signum &= 0x7F
         if signum == SIGTRAP:
             # Never transfer SIGTRAP signal
             return 0
