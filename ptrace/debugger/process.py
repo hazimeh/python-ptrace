@@ -729,14 +729,14 @@ class PtraceProcess(object):
         info("Set %s options to %s" % (self, options))
         ptrace_setoptions(self.pid, options)
 
-    def waitEvent(self):
-        return self.debugger.waitProcessEvent(pid=self.pid)
+    def waitEvent(self, blocking=True):
+        return self.debugger.waitProcessEvent(pid=self.pid, blocking)
 
-    def waitSignals(self, *signals):
-        return self.debugger.waitSignals(*signals, pid=self.pid)
+    def waitSignals(self, *signals, blocking=True):
+        return self.debugger.waitSignals(*signals, blocking, pid=self.pid)
 
-    def waitSyscall(self):
-        return self.debugger.waitSyscall(self)
+    def waitSyscall(self, blocking=True):
+        return self.debugger.waitSyscall(self, blocking)
 
     def findBreakpoint(self, address):
         for bp in self.breakpoints.values():
