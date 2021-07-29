@@ -141,7 +141,7 @@ class PtraceDebugger(object):
                                 % (pid, wanted_pid), pid=pid)
         return pid, status
 
-    def _wait_event_pid(self, wanted_pid, blocking=True):
+    def _wait_event(self, wanted_pid, blocking=True):
         """
         Wait for a process event from the specified process identifier. If
         blocking=False, return None if there is no new event, otherwise return
@@ -164,25 +164,6 @@ class PtraceDebugger(object):
             except KeyError:
                 warning("waitpid() warning: Unknown PID %r" % pid)
         return process.processStatus(status)
-
-    def _wait_event(self, wanted_pid, blocking=True):
-        if wanted_pid is not None:
-            return self._wait_event_pid(wanted_pid, blocking=blocking)
-
-        pause = 0.001
-        while True:
-            pids = tuple(self.dict)
-            if len(pids) > 1:
-                for pid in pids:
-                    process = self._wait_event_pid(pid, blocking=False)
-                    if process is not None:
-                        return process
-                if not blocking:
-                    return None
-                pause = min(pause * 2, 0.5)
-                sleep(pause)
-            else:
-                return self._wait_event_pid(pids[0], blocking=blocking)
 
     def waitProcessEvent(self, pid=None, blocking=True):
         """

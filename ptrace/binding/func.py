@@ -112,6 +112,7 @@ if RUNNING_LINUX:
     PTRACE_GETEVENTMSG = 0x4201
 
     # Linux introduces the __WALL flag for wait
+    # Revisit: __WALL is the default for ptraced children since Linux 4.7
     THREAD_TRACE_FLAGS = 0x40000000
 
 PTRACE_O_TRACESYSGOOD = 0x00000001
